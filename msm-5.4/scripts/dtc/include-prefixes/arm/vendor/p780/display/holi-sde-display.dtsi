@@ -1,0 +1,45 @@
+#include "holi-sde-display-common.dtsi"
+
+&pm6150l_gpios {
+	disp_pins {
+		disp_pins_default: disp_pins_default {
+			pins = "gpio9";
+			function = "func1";
+			qcom,drive-strength = <2>;
+			power-source = <1>;
+			bias-disable;
+			output-low;
+		};
+	};
+};
+
+&sde_dsi {
+	clocks = <&mdss_dsi_phy0 BYTECLK_MUX_0_CLK>,
+		 <&mdss_dsi_phy0 PCLK_MUX_0_CLK>,
+		 <&mdss_dsi_phy0 BYTECLK_SRC_0_CLK>,
+		 <&mdss_dsi_phy0 PCLK_SRC_0_CLK>,
+		 <&mdss_dsi_phy0 SHADOW_BYTECLK_SRC_0_CLK>,
+		 <&mdss_dsi_phy0 SHADOW_PCLK_SRC_0_CLK>;
+	clock-names = "mux_byte_clk0", "mux_pixel_clk0",
+			"src_byte_clk0", "src_pixel_clk0",
+			"shadow_byte_clk0", "shadow_pixel_clk0";
+
+	pinctrl-names = "panel_active", "panel_suspend";
+	pinctrl-0 = <&sde_te_active &disp_pins_default>;
+	pinctrl-1 = <&sde_te_suspend>;
+
+	qcom,platform-te-gpio = <&tlmm 23 0>;
+	qcom,panel-te-source = <0>;
+
+	vddio-supply = <&L1E>;
+	vdd-supply = <&L8A>;
+
+	lab-supply = <&ab_vreg>;
+	ibb-supply = <&ibb_vreg>;
+};
+
+&mdss_mdp {
+	connectors = <&smmu_sde_unsec &smmu_sde_sec &sde_dsi>;
+};
+
+

@@ -1,0 +1,22 @@
+config NFC_ST54J
+    tristate "ST NFC driver solution - NFC Controller Driver"
+    depends on I2C
+    select NFC_ST54J_SPI
+    help
+      STMicroelectronics ST54J Near Field Communication controller
+      support. ST21NFC is standalone NFC and ST54J is combined with secure
+      element. If configures to be y, means devices supports NFC
+      functionality. If configures to be n, means devices doesn't support
+      NFC functionality.
+
+config NFC_ST54J_SPI
+    tristate "ST NFC driver solution - SPI Controller Driver"
+    depends on SPI && NFC_ST54J
+    help
+      STMicroelectronics ST54J Secure Element controller SPI interface
+      support. ST21NFC is standalone NFC and ST54J is combined with
+      secure element. If configures to be y, means devices supports SPI
+      interface to ST54J. If configures to be n, means devices doesn't
+      support SPI interface.
+
+

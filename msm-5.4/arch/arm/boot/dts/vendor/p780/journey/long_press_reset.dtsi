@@ -1,0 +1,24 @@
+#ifndef LONG_PRESS_RESET_DTSI
+#define LONG_PRESS_RESET_DTSI
+#include <dt-bindings/input/qcom,qpnp-power-on.h>
+
+&spmi_bus {
+	qcom,pm6150@0 {
+		qcom,power-on@800 {
+			qcom,pon_1 {
+				qcom,pon-type = <PON_POWER_ON_TYPE_KPDPWR>;
+				qcom,pull-up;
+				linux,code = <KEY_POWER>;
+				qcom,support-reset = <1>;
+				qcom,s1-timer = <6720>; 
+				qcom,s2-timer = <2000>;
+#ifdef JOURNEY_DEBUG_ENHANCED
+				qcom,s2-type = <PON_POWER_OFF_TYPE_WARM_RESET>;
+#else
+				qcom,s2-type = <PON_POWER_OFF_TYPE_HARD_RESET>;
+#endif
+			};
+		};
+	};
+};
+#endif

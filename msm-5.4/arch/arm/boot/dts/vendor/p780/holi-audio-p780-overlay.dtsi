@@ -1,0 +1,139 @@
+#include <dt-bindings/iio/qti_power_supply_iio.h>
+
+&qupv3_se10_i2c {
+	status = "okay";
+
+/* Add SmartPA config */
+	fs1862@34 {
+		compatible = "foursemi,fs16xx";
+		reg = <0x34>;
+		status = "okay";
+	};
+/* Add usb switch config*/
+	usb_switch:usb_switch@42 {
+		compatible = "tinno,usb-switch";
+		reg  = <0x42>;
+		io-channels = <&pm7250b_charger PSY_IIO_TYPEC_ACCESSORY_MODE>;
+		io-channel-names = "typec_mode";
+		qcom,use-power-supply = <1>;
+		status = "okay";
+	};
+};
+/* Disable smb1396 for fs1862su 0x34 */
+&smb1396 {
+	status = "disabled";
+};
+
+/* Disalbe fsa4480 switch*/
+/*
+&fsa4480 {
+	status = "disabled";
+};
+*/
+
+/* Configure MI2S0 SD0&SD1 */
+&dai_mi2s0 {
+	/* SD0 line for playback */
+	qcom,msm-mi2s-rx-lines = <1>;
+	/* SD1 line for recording(SmartPA EC) */
+	qcom,msm-mi2s-tx-lines = <2>;
+};
+
+/* Disable dmic pinctrl*/
+&cdc_dmic01_gpios {
+	status = "disabled";
+};
+
+&cdc_dmic23_gpios {
+	status = "disabled";
+};
+
+/* Add pinctrl for MI2S0 */
+&q6core {
+	cdc_pri_mi2s_gpios: msm_cdc_pinctrl_pri {
+		compatible = "qcom,msm-cdc-pinctrl";
+		pinctrl-names = "aud_active", "aud_sleep";
+		pinctrl-0 = <&lpi_i2s1_sck_active &lpi_i2s1_ws_active
+			&lpi_i2s1_sd0_active &lpi_i2s1_sd1_active>;
+		pinctrl-1 = <&lpi_i2s1_sck_sleep &lpi_i2s1_ws_sleep
+			&lpi_i2s1_sd0_sleep &lpi_i2s1_sd1_sleep>;
+		qcom,lpi-gpios;
+		#gpio-cells = <0>;
+	};
+};
+
+/* 1. Disable WSA Speaker Amp
+ * 2. Add pri-mi2s pinctrl entry
+ * 3. Remove Dmic pinctrl
+ * 4. Enable MI2S interface
+ */
+
+&holi_snd {
+	qcom,audio-routing =
+		"AMIC1", "Analog Mic1",
+		"Analog Mic1", "MIC BIAS1",
+		"AMIC2", "Analog Mic2",
+		"Analog Mic2", "MIC BIAS2",
+		"AMIC3", "Analog Mic3",
+		"Analog Mic3", "MIC BIAS3",
+		"TX DMIC0", "Digital Mic0",
+		"TX DMIC0", "MIC BIAS1",
+		"TX DMIC1", "Digital Mic1",
+		"TX DMIC1", "MIC BIAS1",
+		"TX DMIC2", "Digital Mic2",
+		"TX DMIC2", "MIC BIAS3",
+		"TX DMIC3", "Digital Mic3",
+		"TX DMIC3", "MIC BIAS3",
+		"IN1_HPHL", "HPHL_OUT",
+		"IN2_HPHR", "HPHR_OUT",
+		"IN3_AUX", "AUX_OUT",
+		"RX_TX DEC0_INP", "TX DEC0 MUX",
+		"RX_TX DEC1_INP", "TX DEC1 MUX",
+		"RX_TX DEC2_INP", "TX DEC2 MUX",
+		"RX_TX DEC3_INP", "TX DEC3 MUX",
+		"TX SWR_INPUT", "WCD_TX_OUTPUT",
+		"VA SWR_INPUT", "VA_SWR_CLK",
+		"VA SWR_INPUT", "WCD_TX_OUTPUT",
+		"VA_AIF1 CAP", "VA_SWR_CLK",
+		"VA_AIF2 CAP", "VA_SWR_CLK",
+		"VA_AIF3 CAP", "VA_SWR_CLK",
+		"VA DMIC0", "Digital Mic0",
+		"VA DMIC1", "Digital Mic1",
+		"VA DMIC2", "Digital Mic2",
+		"VA DMIC3", "Digital Mic3",
+		"VA DMIC4", "Digital Mic4",
+		"VA DMIC5", "Digital Mic5",
+		"VA DMIC0", "VA MIC BIAS1",
+		"VA DMIC1", "VA MIC BIAS1",
+		"VA DMIC2", "VA MIC BIAS3",
+		"VA DMIC3", "VA MIC BIAS3";
+	asoc-codec  = <&stub_codec>, <&bolero>,
+		      <&wcd937x_codec>;
+	asoc-codec-names = "msm-stub-codec.1", "bolero_codec",
+			   "wcd937x_codec";
+
+	/* Add usbc nodes*/
+/*	qcom,model = "holi-usbc-snd-card"; */
+	qcom,msm-mbhc-usbc-audio-supported = <1>;
+	qcom,msm-mbhc-hphl-swh = <0>;
+	qcom,msm-mbhc-gnd-swh = <0>;
+	usb-switch-i2c-handle = <&usb_switch>;
+
+	qcom,mi2s-audio-intf = <1>;
+	qcom,pri-mi2s-gpios = <&cdc_pri_mi2s_gpios>;
+	/delete-property/ qcom,cdc-dmic01-gpios;
+	/delete-property/ qcom,cdc-dmic23-gpios;
+};
+
+/* set micbias2 to 2.7V for headset*/
+&wcd937x_codec {
+	qcom,cdc-micbias2-mv = <2700>;
+};
+
+&wsa881x_i2c_e {
+	status = "disabled";
+};
+
+&wsa881x_i2c_44 {
+	status = "disabled";
+};

@@ -1,0 +1,5 @@
+config USB_SWITCH
+	tristate "Tinno usb switch Driver"
+	depends on I2C
+	help
+	  Support both as6480 & hl5280h.
